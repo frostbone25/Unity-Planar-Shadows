@@ -20,6 +20,7 @@
 
 		Pass 
 		{   
+			Cull Off
 			ZWrite On
 			ZTest LEqual 
 			Blend SrcAlpha OneMinusSrcAlpha
@@ -36,6 +37,8 @@
 			#include "UnityCG.cginc"
 			#pragma vertex vertex_base
 			#pragma fragment fragment_base
+
+			#pragma multi_compile_instancing
 
 			//compile a variant that uses probe lighting instead of regular unity lighting
 			#pragma shader_feature_local _SAMPLE_PROBE_LIGHTING
@@ -84,29 +87,32 @@
 				UNITY_INITIALIZE_OUTPUT(vertex_output, o);
 				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
-				o.vertex = UnityObjectToClipPos(v.vertex);
-
-				float4 worldPosition = mul(unity_ObjectToWorld, v.vertex);
-
-				//sample the light direction
-				//we can sample from a regular unity light
-				//or sample the dominant direction of light from light probes
-				
+				/*
+					sample the light direction.
+					we can sample from a regular unity light,
+					or sample the dominant direction of light from light probes.
+				*/
 				#if defined (_SAMPLE_PROBE_LIGHTING)
 					float3 lightDirection = -normalize(GetDominantSphericalHarmoncsDirection()); //probe lighting
 				#else
 					float3 lightDirection = -normalize(_WorldSpaceLightPos0); //unity light source
 				#endif
 
-				float opposite = worldPosition.y - _PlaneHeight;
-
 				//modified a bit slightly to include a clamp value.
 				//this will control the length of the shadows especially when cast at grazing angles
 				float cosTheta = clamp(-lightDirection.y, _MinimumLightDirectionY, 1.0);
-				float hypotenuse = opposite / cosTheta;
-				float3 vertexPosition = worldPosition.xyz + (lightDirection * hypotenuse);
 
-				o.vertex = mul(UNITY_MATRIX_VP, float4(vertexPosition.x, _PlaneHeight, vertexPosition.z, 1));
+				//we will be working in world space to convert vertex from object space to world space.
+				float4 vertexWorldPosition = mul(unity_ObjectToWorld, v.vertex);
+
+				//using trigonometry, calculate where the vertex position will be displaced to according to the light direction
+				float opposite = vertexWorldPosition.y - _PlaneHeight;
+				float hypotenuse = opposite / cosTheta;
+
+				//offset the vertex position according to the light direction and the length of the hypotenuse (so that it basically stretches out).
+				float3 offsetVertexWorldPosition = vertexWorldPosition.xyz + (lightDirection * hypotenuse);
+
+				o.vertex = mul(UNITY_MATRIX_VP, float4(offsetVertexWorldPosition.x, _PlaneHeight, offsetVertexWorldPosition.z, 1));
 
 				return o;
 			}
