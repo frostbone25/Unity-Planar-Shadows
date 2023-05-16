@@ -4,7 +4,7 @@
 
 ![image](GithubContent/preview.png)
 
-*Note: In the preview, you can see the planar shadows in action. Blob shadows are also used in conjunction to give the impression of AO. Together they can create very convincing lighting.*
+*Note: In the preview, you can see the planar shadows in action. Blob shadows are also used in conjunction to give the impression of AO. Together they can create very convincing lighting for cheap!.*
 
 ## How It Works
 
