@@ -35,9 +35,10 @@ Detailed explain(Korean) : http://ozlael.tistory.com/10
 4. ***NEW:*** Works with baked lighting. Using light probes, it computes the dominant direction of light.
 
 ### Disadvantages
-1. Only works on planar/flat surfaces *(Does not work on sloped or complex surfaces)*.
+1. **Only works on planar/flat surfaces** *(Does not work on sloped or complex surfaces)*.
 2. Only hard shadows.
 3. Uses Stencil. But, It is not a big deal nowadays because mobile devices are support it.
+4. The shadow will slide around with the baked lighting approach as new dominant sources of light change.
 
 ### TODO:
 1. Fix issue of the shadows disapearing when the main mesh disapears from the camera frustum.
@@ -45,6 +46,8 @@ Detailed explain(Korean) : http://ozlael.tistory.com/10
 
 ## Credits
 
-This is based off the work done by **[ozlael](https://github.com/ozlael)** on his [original project](https://github.com/ozlael/PlannarShadowForUnity) so all credit goes to him!
+This is based off the work done by **[ozlael](https://github.com/ozlael)** on his [original project](https://github.com/ozlael/PlannarShadowForUnity) so all credit goes to him for the main clever implementation!
 
-As for my contributions, I've cleaned up and refactored the code so it's all contained in one simple shader. Added [Single-Pass Instancing](https://docs.unity3d.com/Manual/SinglePassInstancing.html) support. I've also added a couple of noteworthy features, one of those being that this can work with 100% baked lighting by sampling the dominant direction of light from light probes. I've also introduced a user adjustable value that roughly controls the length of the shadow *(so when the light direction is coming from oblique angles, you can limit the length of the shadows).*
+As for my contributions... 
+
+I've cleaned up and refactored the code for simplicity and clarity, and also so it's all contained in one simple shader. I've added [Single-Pass Instancing](https://docs.unity3d.com/Manual/SinglePassInstancing.html) VR support. I've also added support to work with 100% baked lighting, by sampling the dominant direction of light from light probes. Lastly I've introduced a user adjustable value that roughly controls the length of the shadow *(so when the light direction is coming from oblique or grazing angles, you can limit the length of the shadows).*
