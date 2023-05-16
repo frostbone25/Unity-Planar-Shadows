@@ -6,6 +6,7 @@
 		_PlaneHeight ("Plane Height", Float) = 0
 		_MinimumLightDirectionY("Minimum Light Direction Y", Range(0.0, 1.0)) = 0.25
 		[Toggle(_SAMPLE_PROBE_LIGHTING)] _UseProbeLighting("Sample Light Direction from Probes", Float) = 0
+		[Toggle(_STICK_TO_PLANE)] _UseStickToPlane("Stick Shadow To Plane", Float) = 1
 	}
 
 	SubShader 
@@ -42,6 +43,9 @@
 
 			//compile a variant that uses probe lighting instead of regular unity lighting
 			#pragma shader_feature_local _SAMPLE_PROBE_LIGHTING
+
+			//compile a variant that will stick the shadow to a plane (rather than have it float with the object)
+			#pragma shader_feature_local _STICK_TO_PLANE
 
 			// User-specified uniforms
 			float4 _ShadowColor;
@@ -105,14 +109,25 @@
 				//we will be working in world space to convert vertex from object space to world space.
 				float4 vertexWorldPosition = mul(unity_ObjectToWorld, v.vertex);
 
+				/*
+					set the floor height according to what the user wants.
+					the classic way is to stick it to a plane,
+					but also if they want, we'll give them the option to just have it float with the object origin (does go against what the main effect is about, but let them have their fun)
+				*/
+				#if defined (_STICK_TO_PLANE)
+					float floorHeight = _PlaneHeight;
+				#else
+					float floorHeight = mul(unity_ObjectToWorld, float4(0, 0, 0, 1)).y + _PlaneHeight;
+				#endif
+
 				//using trigonometry, calculate where the vertex position will be displaced to according to the light direction
-				float opposite = vertexWorldPosition.y - _PlaneHeight;
+				float opposite = vertexWorldPosition.y - floorHeight;
 				float hypotenuse = opposite / cosTheta;
 
 				//offset the vertex position according to the light direction and the length of the hypotenuse (so that it basically stretches out).
 				float3 offsetVertexWorldPosition = vertexWorldPosition.xyz + (lightDirection * hypotenuse);
 
-				o.vertex = mul(UNITY_MATRIX_VP, float4(offsetVertexWorldPosition.x, _PlaneHeight, offsetVertexWorldPosition.z, 1));
+				o.vertex = mul(UNITY_MATRIX_VP, float4(offsetVertexWorldPosition.x, floorHeight, offsetVertexWorldPosition.z, 1));
 
 				return o;
 			}
