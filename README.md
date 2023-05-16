@@ -4,7 +4,7 @@
 
 ![image](GithubContent/preview.png)
 
-*Note: In the preview, you can see the planar shadows in action. Blob shadows are also used in conjunction to give the impression of AO. Together they can create very convincing lighting for cheap!.*
+*Note: In the preview, you can see the planar shadows in action. Blob shadows are also used in conjunction to give the impression of AO. Together they can create very convincing lighting for cheap!*
 
 ## How It Works
 
@@ -29,8 +29,8 @@ o.pos = mul (UNITY_MATRIX_VP, float4(vPos.x, _PlaneHeight, vPos.z ,1));
 Detailed explain(Korean) : http://ozlael.tistory.com/10
 
 ### Advantages
-1. Cheap! Core part is only for Vertex Shader. Pixel Shader handles only color and alpha (plus, Stencil)
-2. You can use LOD mesh for shadows. While shadowmaps *(Unity’s shadows)* have to draw original mesh twice at least.
+1. Cheap! Core part is only for the Vertex Shader. The Pixel Shader handles only color and alpha (plus, Stencil)
+2. You can use LOD mesh for shadows. While shadowmaps *(Unity’s shadows)* have to draw original mesh at least twice.
 3. Shadows are pixel perfect compared to shadowmaps. Mobile devices have to use blocky hard shadow because they doesn't have enough power to use soft shadows.
 4. ***NEW:*** Works with baked lighting. Using light probes, it computes the dominant direction of light.
 
@@ -41,7 +41,7 @@ Detailed explain(Korean) : http://ozlael.tistory.com/10
 
 ### TODO:
 1. Fix issue of the shadows disapearing when the main mesh disapears from the camera frustum.
-2. Add support for additive lights beyond just the directional light (i.e. point lights).
+2. Add support for additional lights beyond just the directional light (i.e. spot/point lights).
 
 ## Credits
 
