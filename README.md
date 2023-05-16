@@ -40,9 +40,9 @@ Detailed explain(Korean) : http://ozlael.tistory.com/10
 3. Uses Stencil. But, It is not a big deal nowadays because mobile devices are support it.
 4. The shadow will slide around with the baked lighting approach as new dominant sources of light change.
 
-### TODO:
-1. Fix issue of the shadows disapearing when the main mesh disapears from the camera frustum.
-2. Add support for additional lights beyond just the directional light (i.e. spot/point lights).
+### Future Plans
+- Add support for additional lights beyond just the directional light (i.e. spot/point lights).
+- Fix layering issue with other duplicate shadow meshes that are casting shadows from realtime lights rather than baked lights.
 
 ## Credits
 
