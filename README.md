@@ -50,4 +50,10 @@ This is based off the work done by **[ozlael](https://github.com/ozlael)** on hi
 
 As for my contributions... 
 
-I've cleaned up and refactored the code for simplicity and clarity, and also so it's all contained in one simple shader. I've added [Single-Pass Instancing](https://docs.unity3d.com/Manual/SinglePassInstancing.html) VR support. I've also added support to work with 100% baked lighting, by sampling the dominant direction of light from light probes. Lastly I've introduced a user adjustable value that roughly controls the length of the shadow *(so when the light direction is coming from oblique or grazing angles, you can limit the length of the shadows).*
+- Cleaned up and refactored code for simplicity/clarity. *(only one shader file for each version, planar and blob shadow)*
+- [Single-Pass Instancing](https://docs.unity3d.com/Manual/SinglePassInstancing.html) VR support. 
+- Support for baked lighting. *(samples the dominant direction of light from light probes)*
+- User adjustable value that roughly controls the length of the shadow *(so when the light direction is coming from oblique or grazing angles, you can limit the length of the shadows).*
+- Distance Fading with height *(adjustable by the user)*
+- Toggle for the planar shadows to stick to an arbitrary plane, or the mesh origin.
+- Added blob shadow version, which is similar to the planar shadow implementation except simpler. *(no light directions are accounted for)*
