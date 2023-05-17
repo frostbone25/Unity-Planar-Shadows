@@ -2,11 +2,18 @@
 {
 	Properties 
 	{
+		[Header(Appearance)]
 		_ShadowColor ("Shadow Color", Color) = (0,0,0,1)
+
+		[Header(Planar Properties)]
 		_PlaneHeight ("Plane Height", Float) = 0
 		_MinimumLightDirectionY("Minimum Light Direction Y", Range(0.0, 1.0)) = 0.25
 		[Toggle(_SAMPLE_PROBE_LIGHTING)] _UseProbeLighting("Sample Light Direction from Probes", Float) = 0
 		[Toggle(_STICK_TO_PLANE)] _UseStickToPlane("Stick Shadow To Plane", Float) = 1
+
+		[Header(Distance Fade)]
+		[Toggle(_DISTANCE_FADE)] _UseDistanceFade("Fade With Distance", Float) = 1
+		_FadeHeight("Fade Height", Float) = 5
 	}
 
 	SubShader 
@@ -47,10 +54,14 @@
 			//compile a variant that will stick the shadow to a plane (rather than have it float with the object)
 			#pragma shader_feature_local _STICK_TO_PLANE
 
+			//compile a variant that will fade the shadow with distance
+			#pragma shader_feature_local _DISTANCE_FADE
+
 			// User-specified uniforms
 			float4 _ShadowColor;
 			float _PlaneHeight;
 			float _MinimumLightDirectionY;
+			float _FadeHeight;
 
 			struct appdata
 			{
@@ -63,6 +74,7 @@
 			struct vertex_output
 			{
 				float4 vertex : SV_POSITION;
+				float heightFade : TEXCOORD0;
 
 				//Single Pass Instancing Support
 				UNITY_VERTEX_OUTPUT_STEREO
@@ -109,6 +121,12 @@
 				//we will be working in world space to convert vertex from object space to world space.
 				float4 vertexWorldPosition = mul(unity_ObjectToWorld, v.vertex);
 
+				//for these cases, we will need the object origin position
+				//for when _STICK_TO_PLANE is toggled off, the plane will be at the mesh origin
+				//for when _DISTANCE_FADE is toggled on, distance will be measured from the mesh origin (rather than each vertex because that will cause some artifacts, we want it to look consistent)
+				#if !defined (_STICK_TO_PLANE) || (_DISTANCE_FADE)
+					float4 meshOriginWorldPosition = mul(unity_ObjectToWorld, float4(0, 0, 0, 1));
+				#endif
 				/*
 					set the floor height according to what the user wants.
 					the classic way is to stick it to a plane,
@@ -117,7 +135,7 @@
 				#if defined (_STICK_TO_PLANE)
 					float floorHeight = _PlaneHeight;
 				#else
-					float floorHeight = mul(unity_ObjectToWorld, float4(0, 0, 0, 1)).y + _PlaneHeight;
+					float floorHeight = meshOriginWorldPosition.y + _PlaneHeight;
 				#endif
 
 				//using trigonometry, calculate where the vertex position will be displaced to according to the light direction
@@ -127,14 +145,29 @@
 				//offset the vertex position according to the light direction and the length of the hypotenuse (so that it basically stretches out).
 				float3 offsetVertexWorldPosition = vertexWorldPosition.xyz + (lightDirection * hypotenuse);
 
+				//set the final modified vertex position
 				o.vertex = mul(UNITY_MATRIX_VP, float4(offsetVertexWorldPosition.x, floorHeight, offsetVertexWorldPosition.z, 1));
+
+				//for distance fading, we need a single float that we multiply with the alpha.
+				//the farther the vertex is from the set plane, the more fade will be applied.
+				#if defined (_DISTANCE_FADE)
+					#if defined (_STICK_TO_PLANE)
+						o.heightFade = saturate((_PlaneHeight + _FadeHeight) - meshOriginWorldPosition.y);
+					#else
+						o.heightFade = saturate(_FadeHeight - meshOriginWorldPosition.y);
+					#endif
+				#endif
 
 				return o;
 			}
 
 			fixed4 fragment_base(vertex_output i) : COLOR
 			{
-				return _ShadowColor;
+				#if defined (_DISTANCE_FADE)
+					return float4(_ShadowColor.rgb, _ShadowColor.a * i.heightFade);
+				#else
+					return _ShadowColor;
+				#endif
 			}
 			ENDCG
 		}

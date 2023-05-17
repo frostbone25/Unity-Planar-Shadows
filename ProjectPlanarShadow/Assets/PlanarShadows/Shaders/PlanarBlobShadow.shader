@@ -1,11 +1,18 @@
-﻿Shader "Custom/PlanarBlobShadow" 
+﻿	Shader "Custom/PlanarBlobShadow" 
 {
 	Properties 
 	{
+		[Header(Appearance)]
 		_BlobColor ("Blob Color", Color) = (0,0,0,1)
 		_BlobTexture ("Blob Shadow", 2D) = "white" {}
+
+		[Header(Planar Properties)]
 		_PlaneHeight("Plane Height", Float) = 0
 		[Toggle(_STICK_TO_PLANE)] _UseStickToPlane("Stick Shadow To Plane", Float) = 1
+
+		[Header(Distance Fade)]
+		[Toggle(_DISTANCE_FADE)] _UseDistanceFade("Fade With Distance", Float) = 1
+		_FadeHeight("Fade Height", Float) = 5
 	}
 
 		SubShader
@@ -33,10 +40,14 @@
 				//compile a variant that will stick the shadow to a plane (rather than have it float with the object)
 				#pragma shader_feature_local _STICK_TO_PLANE
 
+				//compile a variant that will fade the shadow with distance
+				#pragma shader_feature_local _DISTANCE_FADE
+
 				// User-specified uniforms
 				sampler2D _BlobTexture;
 				float4 _BlobColor;
 				float _PlaneHeight;
+				float _FadeHeight;
 
 				struct appdata
 				{
@@ -50,7 +61,7 @@
 				struct vertex_output
 				{
 					float4 vertex : SV_POSITION;
-					float2 uv : TEXCOORD0;
+					float3 uv_heightFade : TEXCOORD0; //XY = UV, Z = Height Fade
 
 					//Single Pass Instancing Support
 					UNITY_VERTEX_OUTPUT_STEREO
@@ -79,15 +90,34 @@
 						float floorHeight = mul(unity_ObjectToWorld, float4(0.0, _PlaneHeight, 0.0, 1.0)).y;
 					#endif
 
+					//set the final modified vertex position
 					o.vertex = mul(UNITY_MATRIX_VP, float4(vertexWorldPosition.x, floorHeight, vertexWorldPosition.z, 1));
-					o.uv = v.texcoord;
+					
+					//set the texcoord so we can map a blob texture
+					o.uv_heightFade.xy = v.texcoord.xy;
+
+					//for distance fading, we need a single float that we multiply with the alpha.
+					//the farther the vertex is from the set plane, the more fade will be applied.
+					#if defined (_DISTANCE_FADE)
+						#if defined (_STICK_TO_PLANE)
+							o.uv_heightFade.z = saturate((_PlaneHeight + _FadeHeight) - vertexWorldPosition.y);
+						#else
+							o.uv_heightFade.z = saturate(_FadeHeight - vertexWorldPosition.y);
+						#endif
+					#endif
 
 					return o;
 				}
 
 				fixed4 fragment_base(vertex_output i) : COLOR
 				{
-					return tex2D(_BlobTexture, i.uv) * _BlobColor;
+					float4 blobShadow = tex2D(_BlobTexture, i.uv_heightFade.xy) * _BlobColor;
+
+					#if defined (_DISTANCE_FADE)
+						blobShadow.a *= i.uv_heightFade.z;
+					#endif
+
+					return blobShadow;
 				}
 				ENDCG
 		}
