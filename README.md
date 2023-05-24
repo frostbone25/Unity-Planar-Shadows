@@ -14,7 +14,7 @@
 
 Planar Shadow is an old school technique for cheap shadowing *(Which makes it very useful for mobile games)* Unity’s default shadowing system uses Shadowmaps, however these utilize Pixel Shaders and Render Targets. That means that Shadowmaps can become expensive especially on mobile devices. (This also applies to other engines, not just for Unity).
 
-Planar Shadows are not real shadows, but they look like a shadow because they are flattened out and projected onto a plane according to the direction of light. The vertex shader does the planar projection according to the direction of light, and in the pixel shader is just a single transparent color. *(Which makes it pretty cheap)*.
+Planar Shadows are not real shadows, but they look like a shadow because they are flattened out and projected onto a plane according to the direction of light. The vertex shader the bulk of the work, and in the pixel shader it just returns a single transparent color. *(Which makes it pretty cheap)*.
 
 It uses a little bit of trigonometric math. See image below: 
 
