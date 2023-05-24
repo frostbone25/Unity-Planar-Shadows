@@ -9,6 +9,7 @@
 ## How It Works (ORIGINAL)
 
 ***Original explanation by [ozlael](https://github.com/ozlael)***
+
 ***Detailed explaination (Korean) : http://ozlael.tistory.com/10***
 
 Planar Shadow is an old school technique for cheap shadowing *(Which makes it very useful for mobile games)* Unity’s default shadowing system uses Shadowmaps, however these utilize Pixel Shaders and Render Targets. That means that Shadowmaps can become expensive especially on mobile devices. (This also applies to other engines, not just for Unity).
