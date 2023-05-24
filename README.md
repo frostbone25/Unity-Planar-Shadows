@@ -8,11 +8,17 @@
 
 ## How It Works (ORIGINAL)
 
-Planar Shadow is an old school technique for cheap shadowing *(Which makes it very useful for mobile games)* Unity’s default shadowing system uses Shadowmaps, however these utilize Pixel Shaders and Render Targets. That means that Shadowmap system is expensive especially on mobile devices. (This also applies to other engines, not just for Unity).
+***Original explanation by [ozlael](https://github.com/ozlael)***
+***Detailed explaination (Korean) : http://ozlael.tistory.com/10***
 
-Planar Shadows are not real shadows. It is just a mesh. But, it looks like a shadow by pressing/projecting into plane using the Vertex Shader. It doesn’t need much power of Pixel Shader.
+Planar Shadow is an old school technique for cheap shadowing *(Which makes it very useful for mobile games)* Unity’s default shadowing system uses Shadowmaps, however these utilize Pixel Shaders and Render Targets. That means that Shadowmaps can become expensive especially on mobile devices. (This also applies to other engines, not just for Unity).
 
-It uses a little bit of math, but, simple trigonometric function. See image below : P is a point of the mesh and P' is a point of the shadow. 
+Planar Shadows are not real shadows, but they look like a shadow because they are flattened out and projected onto a plane according to the direction of light. The vertex shader does the planar projection according to the direction of light, and in the pixel shader is just a single transparent color. *(Which makes it pretty cheap)*.
+
+It uses a little bit of trigonometric math. See image below: 
+
+- **P** is a point of the mesh 
+- **P'** is a point of the shadow. 
 
 ![image](GithubContent/alittlebitmath.jpg)
 
@@ -25,8 +31,6 @@ float hypotenuse = opposite / cosTheta;
 float3 vPos = vPosWorld.xyz + ( lightDirection * hypotenuse );
 o.pos = mul (UNITY_MATRIX_VP, float4(vPos.x, _PlaneHeight, vPos.z ,1));  
 ```
-
-Detailed explain(Korean) : http://ozlael.tistory.com/10
 
 ### Advantages
 1. Cheap! Core part is only for the Vertex Shader. The Pixel Shader handles only color and alpha (plus, Stencil)
