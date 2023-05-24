@@ -6,7 +6,7 @@
 
 *Note: In the preview, you can see the planar shadows in action. Blob shadows are also used in conjunction to give the impression of AO. Together they can create very convincing lighting for cheap!*
 
-## How It Works
+## How It Works (ORIGINAL)
 
 Planar Shadow is an old school technique for cheap shadowing *(Which makes it very useful for mobile games)* Unity’s default shadowing system uses Shadowmaps, however these utilize Pixel Shaders and Render Targets. That means that Shadowmap system is expensive especially on mobile devices. (This also applies to other engines, not just for Unity).
 
